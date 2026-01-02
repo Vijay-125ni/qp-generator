@@ -60,7 +60,7 @@ const Generate = ({ theme, toggleTheme }) => {
                             padding: '6px',
                             borderRadius: '6px'
                         }}>
-                            <Layers size={24} />
+                            <img src="icon.png" alt="Logo" style={{ width: '24px', height: '24px' }} />
                         </div>
                         <span style={{ fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.5px' }}>QP Generator</span>
                     </div>

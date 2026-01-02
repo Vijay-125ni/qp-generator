@@ -190,12 +190,11 @@ const Home = ({ theme, toggleTheme }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{
-                            background: 'var(--primary)',
                             color: 'white',
                             padding: '6px',
                             borderRadius: '6px'
                         }}>
-                            <Layers size={20} />
+                            <img src="icon.png" alt="icon" style={{ width: '30px', height: '30px', backgroundColor: 'none' }} />
                         </div>
                         <span style={{ fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.5px' }}>QP Generator</span>
                     </div>
@@ -244,15 +243,15 @@ const Home = ({ theme, toggleTheme }) => {
             </nav>
 
             {/* Main Content */}
-            <main style={{ flex: 1, padding: '3rem 2rem', background: 'var(--background)' }}>
+            <main style={{ flex: 1, padding: '1.5rem', background: 'var(--background)' }}>
                 <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
                     {/* Hero Section */}
-                    <div style={{ textAlign: 'center', maxWidth: '600px', marginBottom: '3rem' }}>
-                        <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem', lineHeight: '1.2' }}>
+                    <div style={{ textAlign: 'center', maxWidth: '600px', marginBottom: '1.5rem' }}>
+                        <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem', lineHeight: '1.2' }}>
                             Transform Content into <span style={{ color: 'var(--primary)' }}>Question Papers</span>
                         </h1>
-                        <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
                             Upload your documents and let our AI generate professional question papers in seconds.
                         </p>
                     </div>
@@ -260,10 +259,10 @@ const Home = ({ theme, toggleTheme }) => {
                     {/* Upload Area & Syllabus Section */}
                     <div style={{
                         display: 'flex',
-                        gap: '2rem',
+                        gap: '1rem',
                         width: '100%',
                         maxWidth: '100%',
-                        marginBottom: '2rem',
+                        marginBottom: '1rem',
                         flexWrap: 'wrap'
                     }}>
                         {/* Main Upload Area */}
@@ -275,7 +274,7 @@ const Home = ({ theme, toggleTheme }) => {
                             style={{
                                 flex: 1,
                                 minWidth: '300px',
-                                minHeight: '300px',
+                                minHeight: '220px',
                                 border: isDragging ? '2px dashed var(--primary)' : '2px dashed var(--border)',
                                 background: isDragging ? 'rgba(37, 99, 235, 0.02)' : 'var(--surface)',
                                 display: 'flex',
@@ -284,21 +283,21 @@ const Home = ({ theme, toggleTheme }) => {
                                 justifyContent: 'center',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease',
-                                padding: '2rem'
+                                padding: '1.5rem'
                             }}
                         >
                             <div style={{
                                 background: 'rgba(37, 99, 235, 0.1)',
-                                padding: '20px',
+                                padding: '16px',
                                 borderRadius: '50%',
-                                marginBottom: '1.5rem'
+                                marginBottom: '1rem'
                             }}>
-                                <Upload size={48} color="var(--primary)" />
+                                <Upload size={32} color="var(--primary)" />
                             </div>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
                                 Drag & Drop your files here
                             </h3>
-                            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>
                                 Supports PDF, DOCX, TXT (Max 20MB)
                             </p>
 
@@ -309,7 +308,7 @@ const Home = ({ theme, toggleTheme }) => {
                                 onChange={handleFileChange}
                                 multiple // Allow multiple selection
                             />
-                            <button onClick={handleBrowseClick} className="btn btn-primary">
+                            <button onClick={handleBrowseClick} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
                                 Add Book or Notes Files Here
                             </button>
 
@@ -326,8 +325,8 @@ const Home = ({ theme, toggleTheme }) => {
                             style={{
                                 flex: 1,
                                 minWidth: '300px',
-                                minHeight: '300px',
-                                padding: '2rem',
+                                minHeight: '220px',
+                                padding: '1.5rem',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 border: syllabusDragging ? '2px dashed var(--primary)' : '1px solid var(--border)',
@@ -335,9 +334,9 @@ const Home = ({ theme, toggleTheme }) => {
                                 transition: 'all 0.2s ease'
                             }}
                         >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
-                                <FileText size={20} color="var(--primary)" />
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Syllabus</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                                <FileText size={18} color="var(--primary)" />
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: '600' }}>Syllabus</h3>
                             </div>
 
                             <div style={{
@@ -350,16 +349,16 @@ const Home = ({ theme, toggleTheme }) => {
                             }}>
                                 <div style={{
                                     background: 'rgba(99, 102, 241, 0.1)',
-                                    padding: '12px',
+                                    padding: '10px',
                                     borderRadius: '50%',
-                                    marginBottom: '1rem'
+                                    marginBottom: '0.75rem'
                                 }}>
-                                    <Upload size={24} color="#6366f1" />
+                                    <Upload size={20} color="#6366f1" />
                                 </div>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem', textAlign: 'center' }}>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', textAlign: 'center' }}>
                                     Drag & Drop Syllabus
                                 </p>
-                                <button onClick={handleSyllabusBrowseClick} className="btn" style={{ background: 'var(--border)', color: 'var(--text-main)', fontSize: '0.875rem', padding: '0.5rem 1rem' }}>
+                                <button onClick={handleSyllabusBrowseClick} className="btn" style={{ background: 'var(--border)', color: 'var(--text-main)', fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}>
                                     Browse Syllabus
                                 </button>
                                 <input

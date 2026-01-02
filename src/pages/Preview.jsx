@@ -1,24 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Download, Share2, Check, ArrowLeft, FileText, Loader2 } from 'lucide-react';
+import { Download, Share2, Check, ArrowLeft, FileText, Loader2, Sun, Moon, LogOut } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-const Preview = ({ theme }) => {
+const Preview = ({ theme, toggleTheme }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const subjectName = location.state?.subjectName || 'Artificial Intelligence';
+    const [subjectName, setSubjectName] = useState(location.state?.subjectName || 'Artificial Intelligence');
     const numSets = parseInt(location.state?.numSets || '1');
     const [activeSet, setActiveSet] = useState(0);
     const [selectedQuestions, setSelectedQuestions] = useState({});
 
-    // Mock User Details
-    const userDetails = {
-        institutionName: 'SAVEETHA ENGINEERING COLLEGE',
-        address: 'Affiliated to Anna University'
-    };
+    // User Details State
+    const [institutionName, setInstitutionName] = useState('SAVEETHA ENGINEERING COLLEGE');
+    const [institutionAddress, setInstitutionAddress] = useState('Affiliated to Anna University');
 
     const [examTitle, setExamTitle] = useState('UNIVERSITY MODEL EXAMINATION');
+    const [timeDuration, setTimeDuration] = useState('3 Hours');
+    const [maxMarks, setMaxMarks] = useState('100');
 
     // Generate mock sets based on numSets
     const sets = Array.from({ length: numSets }, (_, i) => {
@@ -66,12 +66,6 @@ const Preview = ({ theme }) => {
     const [isDownloading, setIsDownloading] = useState(false);
 
     const toggleQuestion = (id) => {
-        setSelectedQuestions(prev => ({
-            ...prev,
-            [id]: prev[id] === undefined ? false : !prev[id] // logic: if undefined (true implied), become false. If false, become true.
-            // Wait, simpler: if it's NOT false, it's true. So to toggle: if !false (true) -> make false.
-        }));
-        // actually let's make it explicit to match the render logic
         setSelectedQuestions(prev => {
             const currentVal = prev[id] !== false;
             return { ...prev, [id]: !currentVal };
@@ -79,27 +73,63 @@ const Preview = ({ theme }) => {
     };
 
     const handleDownload = async () => {
+        console.log('Starting download process...');
         const element = document.getElementById('preview-content');
-        if (!element) return;
+        if (!element) {
+            console.error('Preview content element not found');
+            return;
+        }
 
         setIsDownloading(true);
         try {
+            console.log('Generating canvas...');
             const canvas = await html2canvas(element, {
                 scale: 2,
                 useCORS: true,
-                logging: false,
+                logging: true, // Enable internal html2canvas logs
                 windowWidth: element.scrollWidth,
-                windowHeight: element.scrollHeight
+                windowHeight: element.scrollHeight,
+                onclone: (clonedDoc) => {
+                    console.log('Cloning document for PDF...');
+                    const questionRows = clonedDoc.querySelectorAll('.question-container');
+                    let questionCounter = 1;
+
+                    questionRows.forEach(row => {
+                        const cb = row.querySelector('input[type="checkbox"]');
+                        if (cb) {
+                            if (!cb.checked) {
+                                // Hide the entire question row if not checked
+                                row.style.display = 'none';
+                            } else {
+                                // Hide just the checkbox
+                                cb.style.display = 'none';
+
+                                // Re-number the question
+                                const textSpan = row.querySelector('.question-text');
+                                if (textSpan) {
+                                    // Replace "Q<number>." with "Q<newNumber>."
+                                    textSpan.innerText = textSpan.innerText.replace(/^Q\d+\./, `Q${questionCounter}.`);
+                                    questionCounter++;
+                                }
+                            }
+                        }
+                    });
+                }
             });
+            console.log('Canvas generated successfully');
+
             const imgData = canvas.toDataURL('image/png');
+            console.log('Initializing jsPDF...');
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(`${subjectName.replace(/\s+/g, '_')}_${currentSet.label}_QP.pdf`);
+            console.log('PDF saved');
         } catch (error) {
             console.error('Error generating PDF:', error);
+            console.error('Stack:', error.stack);
             alert('Failed to generate PDF. Please try again.');
         } finally {
             setIsDownloading(false);
@@ -124,27 +154,96 @@ const Preview = ({ theme }) => {
         }
     };
 
+    const handleLogout = () => {
+        navigate('/login');
+    };
+
+    const handleNavClick = (section) => {
+        alert(`${section} section coming soon!`);
+    };
+
     return (
         <div className="h-screen" style={{ display: 'flex', flexDirection: 'column', background: 'var(--background)', color: 'var(--text-main)', overflowY: 'auto' }}>
-            {/* Header */}
-            <div style={{
-                padding: '1.5rem 2rem',
-                borderBottom: '1px solid var(--border)',
+            {/* Navigation */}
+            <nav style={{
+                padding: '1rem 2rem',
                 background: 'var(--surface)',
+                borderBottom: '1px solid var(--border)',
                 display: 'flex',
-                alignItems: 'center',
                 justifyContent: 'space-between',
-                position: 'sticky',
-                top: 0,
-                zIndex: 10
+                alignItems: 'center'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                        <ArrowLeft size={24} />
-                    </button>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Question Paper Preview</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                            color: 'white',
+                            padding: '6px',
+                            borderRadius: '6px'
+                        }}>
+                            <img src="icon.png" alt="icon" style={{ width: '30px', height: '30px', backgroundColor: 'none' }} />
+                        </div>
+                        <span style={{ fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.5px' }}>QP Generator</span>
+                    </div>
+
+                    {/* User Profile */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        paddingLeft: '2rem',
+                        borderLeft: '1px solid var(--border)'
+                    }}>
+                        <div style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            background: 'var(--primary)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '0.875rem',
+                            fontWeight: '600'
+                        }}>
+                            JD
+                        </div>
+                        <span style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-main)' }}>John Doe</span>
+                    </div>
                 </div>
 
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                    <button
+                        onClick={toggleTheme}
+                        style={{ background: 'transparent', color: 'var(--text-main)', display: 'flex', alignItems: 'center' }}
+                        title="Toggle Theme"
+                    >
+                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                    </button>
+
+                    <a href="#" onClick={(e) => { e.preventDefault(); navigate('/dashboard'); }} style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500', cursor: 'pointer' }}>Dashboard</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('My Papers'); }} style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500', cursor: 'pointer' }}>My Papers</a>
+                    <button onClick={handleLogout} className="btn" style={{ padding: '0.5rem 1rem', color: 'var(--danger)', background: 'rgba(239, 68, 68, 0.1)' }}>
+                        <LogOut size={16} style={{ marginRight: '6px' }} /> Logout
+                    </button>
+                </div>
+            </nav>
+            {/* Header */}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem' }}>
+                <button
+                    onClick={() => navigate('/')}
+                    style={{
+                        marginBottom: '0rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '20px',
+                        background: 'transparent',
+                        color: 'var(--text-muted)'
+                    }}
+                >
+                    <ArrowLeft size={18} />
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Question Paper Preview</h2>
+                </button>
             </div>
 
             {/* Set Tabs */}
@@ -172,35 +271,62 @@ const Preview = ({ theme }) => {
                 </div>
             )}
 
-            <div className="container" style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto', flex: 1 }}>
+            <div className="container" style={{ padding: '0rem', maxWidth: '900px', margin: '0 auto', flex: 1 }}>
 
                 {/* Visual Paper representation */}
                 <div
                     id="preview-content"
                     style={{
-                        background: 'var(--surface)',
+                        background: '#ffffff', // Force white background for paper look
                         padding: '3rem',
                         borderRadius: 'var(--radius-md)',
                         boxShadow: 'var(--shadow-lg)',
                         minHeight: '800px',
-                        color: 'black' // Ensure text is black for PDF
+                        color: '#000000' // Force black text
                     }}>
 
                     {/* Header Section with Grid Layout */}
                     <div style={{ marginBottom: '2rem', borderBottom: '2px solid var(--border)', paddingBottom: '1rem' }}>
 
                         {/* Institution Name */}
-                        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                {userDetails.institutionName}
-                            </h2>
-                            <p style={{ fontSize: '0.9rem', color: '#666' }}>{userDetails.address}</p>
+                        <div style={{ textAlign: 'left', marginBottom: '1rem' }}>
+                            <input
+                                type="text"
+                                value={institutionName}
+                                onChange={(e) => setInstitutionName(e.target.value)}
+                                style={{
+                                    fontSize: '1.25rem',
+                                    fontWeight: '800',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                    width: '100%',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    outline: 'none',
+                                    textAlign: 'left',
+                                    color: '#000000'
+                                }}
+                            />
+                            <input
+                                type="text"
+                                value={institutionAddress}
+                                onChange={(e) => setInstitutionAddress(e.target.value)}
+                                style={{
+                                    fontSize: '0.9rem',
+                                    color: '#000000',
+                                    width: '100%',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    outline: 'none',
+                                    textAlign: 'left'
+                                }}
+                            />
                         </div>
 
                         {/* Exam Title & Intro Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 250px', gap: '2rem', alignItems: 'start', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'grid', gap: '2rem', alignItems: 'start', marginBottom: '1.5rem' }}>
                             {/* Left: Title & Subject */}
-                            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }}>
                                 <input
                                     type="text"
                                     value={examTitle}
@@ -208,19 +334,32 @@ const Preview = ({ theme }) => {
                                     style={{
                                         fontSize: '1.4rem',
                                         fontWeight: 'bold',
-                                        textAlign: 'center',
+                                        textAlign: 'left',
                                         border: '1px dashed transparent',
                                         background: 'transparent',
                                         width: '100%',
                                         marginBottom: '0.5rem',
-                                        padding: '4px',
+                                        padding: '2px',
                                         color: 'black'
                                     }}
                                     className="hover:border-gray-300 focus:border-blue-500 outline-none rounded"
                                 />
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start' }}>
                                     <span style={{ fontSize: '1rem', fontWeight: '600' }}>Subject:</span>
-                                    <span style={{ fontSize: '1rem' }}>{subjectName}</span>
+                                    <input
+                                        type="text"
+                                        value={subjectName}
+                                        onChange={(e) => setSubjectName(e.target.value)}
+                                        style={{
+                                            fontSize: '1rem',
+                                            border: 'none',
+                                            background: 'transparent',
+                                            outline: 'none',
+                                            fontWeight: '400',
+                                            color: 'black',
+                                            width: '300px'
+                                        }}
+                                    />
                                 </div>
                                 {numSets > 1 && (
                                     <span style={{ fontSize: '0.9rem', fontWeight: '600', border: '1px solid black', padding: '2px 8px', borderRadius: '4px', marginTop: '8px', display: 'inline-block' }}>
@@ -228,35 +367,45 @@ const Preview = ({ theme }) => {
                                     </span>
                                 )}
                             </div>
-
-                            {/* Right: Student Details Box */}
-                            <div style={{
-                                border: '1px solid black',
-                                padding: '1rem',
-                                fontSize: '0.9rem',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.75rem'
-                            }}>
-                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                    <span style={{ fontWeight: '600', minWidth: '70px' }}>Name:</span>
-                                    <div style={{ borderBottom: '1px dotted black', flex: 1, height: '1.2em' }}></div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                    <span style={{ fontWeight: '600', minWidth: '70px' }}>Reg No:</span>
-                                    <div style={{ borderBottom: '1px dotted black', flex: 1, height: '1.2em' }}></div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                    <span style={{ fontWeight: '600', minWidth: '70px' }}>Year/Sem:</span>
-                                    <div style={{ borderBottom: '1px dotted black', flex: 1, height: '1.2em' }}></div>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Meta Info */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '0.9rem', fontWeight: '600', borderTop: '1px solid #eee', paddingTop: '0.5rem' }}>
-                            <span>Time: 3 Hours</span>
-                            <span>Max Marks: 100</span>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <span style={{ marginRight: '4px' }}>Time:</span>
+                                <input
+                                    type="text"
+                                    value={timeDuration}
+                                    onChange={(e) => setTimeDuration(e.target.value)}
+                                    style={{
+                                        border: 'none',
+                                        background: 'transparent',
+                                        fontWeight: '600',
+                                        fontSize: '0.9rem',
+                                        color: '#000000',
+                                        width: '80px',
+                                        outline: 'none'
+                                    }}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <span style={{ marginRight: '4px' }}>Max Marks:</span>
+                                <input
+                                    type="text"
+                                    value={maxMarks}
+                                    onChange={(e) => setMaxMarks(e.target.value)}
+                                    style={{
+                                        border: 'none',
+                                        background: 'transparent',
+                                        fontWeight: '600',
+                                        fontSize: '0.9rem',
+                                        color: '#000000',
+                                        width: '40px',
+                                        textAlign: 'right',
+                                        outline: 'none'
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -264,7 +413,7 @@ const Preview = ({ theme }) => {
                     <div style={{ marginBottom: '2rem' }}>
                         <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Part A (Short Answer)</h3>
                         {currentSet.questions.partA.map((q, idx) => (
-                            <div key={q.id} style={{
+                            <div key={q.id} className="question-container" style={{
                                 display: 'flex',
                                 gap: '1rem',
                                 padding: '1rem',
@@ -281,7 +430,7 @@ const Preview = ({ theme }) => {
                                 />
                                 <div style={{ flex: 1 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ fontWeight: '600' }}>Q{idx + 1}. {q.text}</span>
+                                        <span className="question-text" style={{ fontWeight: '600' }}>Q{idx + 1}. {q.text}</span>
                                         <span style={{ fontWeight: 'bold' }}>({q.marks})</span>
                                     </div>
                                 </div>
@@ -293,7 +442,7 @@ const Preview = ({ theme }) => {
                     <div>
                         <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Part B (Essay)</h3>
                         {currentSet.questions.partB.map((q, idx) => (
-                            <div key={q.id} style={{
+                            <div key={q.id} className="question-container" style={{
                                 display: 'flex',
                                 gap: '1rem',
                                 padding: '1rem',
@@ -310,7 +459,7 @@ const Preview = ({ theme }) => {
                                 />
                                 <div style={{ flex: 1 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ fontWeight: '600' }}>Q{idx + 1 + currentSet.questions.partA.length}. {q.text}</span>
+                                        <span className="question-text" style={{ fontWeight: '600' }}>Q{idx + 1 + currentSet.questions.partA.length}. {q.text}</span>
                                         <span style={{ fontWeight: 'bold' }}>({q.marks})</span>
                                     </div>
                                 </div>

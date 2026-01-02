@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Generate from './pages/Generate';
@@ -23,10 +24,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/" element={<Home theme={theme} toggleTheme={toggleTheme} />} />
         <Route path="/dashboard" element={<Dashboard theme={theme} toggleTheme={toggleTheme} />} />
         <Route path="/generate" element={<Generate theme={theme} toggleTheme={toggleTheme} />} />
-        <Route path="/preview" element={<Preview theme={theme} />} />
+        <Route path="/preview" element={<Preview theme={theme} toggleTheme={toggleTheme} />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
